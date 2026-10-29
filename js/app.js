@@ -199,7 +199,7 @@
 
     // letterhead: logo left, company details right
     var logoW = 64, logoH = logoW * window.WANISA_LOGO.h / window.WANISA_LOGO.w;
-    doc.addImage(window.WANISA_LOGO.src, 'PNG', M, 14, logoW, logoH);
+    doc.addImage(window.WANISA_LOGO.src, 'PNG', M, 14, logoW, logoH, 'logo', 'FAST');
     var y = 15;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor.apply(doc, CHAR);
     doc.text(cfg.name, R, y, { align: 'right' }); y += 5;
