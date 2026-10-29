@@ -210,11 +210,11 @@
     // title + receipt facts
     doc.setFont('helvetica', 'bold'); doc.setFontSize(22); doc.setTextColor.apply(doc, CHAR);
     doc.text('INVOICE', M, y);
-    var facts = [['Invoice no.', s.number], ['Date', niceDate(s.date)], ['Payment', s.method]];
+    var facts = [['Invoice no.', s.number], ['Date', niceDate(s.date)], ['Payment method', s.method]];
     var fy = y - 7;
     facts.forEach(function (f) {
       doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor.apply(doc, MUTED);
-      doc.text(f[0], R - 46, fy);
+      doc.text(f[0], R - 64, fy);
       doc.setFont('helvetica', 'bold'); doc.setTextColor.apply(doc, INK);
       doc.text(String(f[1]), R, fy, { align: 'right' });
       fy += 5;
@@ -274,7 +274,7 @@
     // left column next to the totals: payment status + bank details + notes
     var ly = doc.lastAutoTable.finalY + 6;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor.apply(doc, CHAR);
-    doc.text('Payment received in full by ' + s.method.toLowerCase() + '.', M, ly);
+    doc.text('Payment method: ' + s.method, M, ly);
     ly += 6;
     function block(title, text) {
       if (!text) return;
