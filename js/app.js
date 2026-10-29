@@ -1,4 +1,4 @@
-// Wanisa Renovations receipt generator: runs fully in the browser, nothing is uploaded.
+// Wanisa Renovations invoice generator: runs fully in the browser, nothing is uploaded.
 // Only the company details and the receipt counter are kept (localStorage). Client
 // details are never stored: they exist in the open form and the PDF you download.
 (function () {
@@ -160,7 +160,7 @@
     document.querySelectorAll('.invalid').forEach(function (e) { e.classList.remove('invalid'); });
     var bad = [];
     function flag(input, msg) { input.classList.add('invalid'); bad.push(msg); }
-    if (!s.number) flag($('r-number'), 'receipt number');
+    if (!s.number) flag($('r-number'), 'invoice number');
     if (!s.date) flag($('r-date'), 'date');
     if (!s.client.name) flag($('c-name'), 'client name');
     if (!s.client.phone) flag($('c-phone'), 'client phone');
@@ -209,8 +209,8 @@
 
     // title + receipt facts
     doc.setFont('helvetica', 'bold'); doc.setFontSize(22); doc.setTextColor.apply(doc, CHAR);
-    doc.text('RECEIPT', M, y);
-    var facts = [['Receipt no.', s.number], ['Date', niceDate(s.date)], ['Payment', s.method]];
+    doc.text('INVOICE', M, y);
+    var facts = [['Invoice no.', s.number], ['Date', niceDate(s.date)], ['Payment', s.method]];
     var fy = y - 7;
     facts.forEach(function (f) {
       doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor.apply(doc, MUTED);
@@ -228,7 +228,7 @@
     var boxH = 13 + clientLines.length * 4.5;
     doc.roundedRect(M, y, R - M, boxH, 2, 2, 'F');
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor.apply(doc, MUTED);
-    doc.text('RECEIVED FROM', M + 5, y + 6);
+    doc.text('CUSTOMER DETAILS', M + 5, y + 6);
     doc.setFontSize(11.5); doc.setTextColor.apply(doc, INK);
     doc.text(c.name, M + 5, y + 11.5);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor.apply(doc, MUTED);
@@ -268,7 +268,7 @@
     doc.setFillColor.apply(doc, CHAR);
     doc.roundedRect(tx - 4, y - 3, R - tx + 4, 11, 2, 2, 'F');
     doc.setFont('helvetica', 'bold'); doc.setTextColor.apply(doc, PEARL); doc.setFontSize(11);
-    doc.text('TOTAL PAID', tx, y + 4);
+    doc.text('TOTAL', tx, y + 4);
     doc.setFontSize(12.5); doc.text(rm(s.total), R - 3, y + 4.2, { align: 'right' });
 
     // left column next to the totals: payment status + bank details + notes
@@ -293,7 +293,7 @@
     doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5); doc.setTextColor.apply(doc, CHAR);
     doc.text(cfg.thanks || '', M, sy);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor.apply(doc, MUTED);
-    doc.text('This is a computer-generated receipt and does not require a signature.', M, sy + 5);
+    doc.text('This is a computer-generated invoice and does not require a signature.', M, sy + 5);
 
     // page numbers once all pages exist
     var n = doc.getNumberOfPages();
@@ -302,19 +302,19 @@
       doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor.apply(doc, MUTED);
       doc.text('Page ' + p + ' of ' + n, R, 290, { align: 'right' });
     }
-    doc.setProperties({ title: 'Receipt ' + s.number, subject: 'Receipt for ' + c.name, author: cfg.name, creator: cfg.name });
+    doc.setProperties({ title: 'Invoice ' + s.number, subject: 'Invoice for ' + c.name, author: cfg.name, creator: cfg.name });
     return doc;
 
     function footer() {
       doc.setDrawColor.apply(doc, DOVE); doc.setLineWidth(0.3); doc.line(M, 284, R, 284);
       doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor.apply(doc, MUTED);
-      doc.text(cfg.name + '  ·  ' + [cfg.phone, cfg.web].filter(Boolean).join('  ·  ') + '  ·  Computer-generated receipt', M, 290);
+      doc.text(cfg.name + '  ·  ' + [cfg.phone, cfg.web].filter(Boolean).join('  ·  ') + '  ·  Computer-generated invoice', M, 290);
     }
   }
 
   function fileName(s) {
     var who = s.client.name.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
-    return 'Receipt-' + s.number.replace(/[^A-Za-z0-9-]+/g, '') + (who ? '-' + who : '') + '.pdf';
+    return 'Invoice-' + s.number.replace(/[^A-Za-z0-9-]+/g, '') + (who ? '-' + who : '') + '.pdf';
   }
 
   // ---------- receipt numbering ----------
@@ -361,7 +361,7 @@
   $('new-receipt').addEventListener('click', function () {
     var s = state();
     var started = s.client.name || s.items.some(function (i) { return i.name || i.unit; });
-    if (started && !window.confirm('Start a new receipt? The current form will be cleared.')) return;
+    if (started && !window.confirm('Start a new invoice? The current form will be cleared.')) return;
     if (numberOf(s.number) >= settings.next) markUsed(s);
     fill(null);
     $('c-name').focus();
