@@ -55,15 +55,8 @@
     </section>
 
     <section class="card">
-      <h2>Tax and total</h2>
-      <div class="tax-row">
-        <label class="radio"><input type="radio" name="tax" value="with" id="tax-with"> With tax</label>
-        <label class="radio"><input type="radio" name="tax" value="without" id="tax-without" checked> Without tax</label>
-        <label class="rate">Rate (%)<input id="tax-rate" type="number" min="0" max="100" step="0.01" inputmode="decimal"></label>
-      </div>
+      <h2>Total</h2>
       <dl class="totals">
-        <dt>Subtotal</dt><dd id="t-sub">RM 0.00</dd>
-        <dt id="t-tax-label">Tax</dt><dd id="t-tax">RM 0.00</dd>
         <dt class="grand">Total</dt><dd class="grand" id="t-total">RM 0.00</dd>
       </dl>
       <label>Notes (optional, printed on the receipt)<textarea id="r-notes" rows="2" placeholder="e.g. 3-month workmanship warranty on the waterproofing"></textarea></label>
@@ -91,9 +84,6 @@
       <label>Email<input id="s-email" type="email"></label>
       <label>Website<input id="s-web"></label>
       <label>Receipt prefix<input id="s-prefix" maxlength="8"></label>
-      <label>Tax name<input id="s-tax-label" placeholder="SST"></label>
-      <label>Default tax rate (%)<input id="s-tax-rate" type="number" min="0" max="100" step="0.01"></label>
-      <label>Tax registration no.<input id="s-tax-reg" placeholder="optional, printed when tax is charged"></label>
       <label>Next receipt number<input id="s-next" type="number" min="1" step="1"></label>
       <label class="span2">Payment / bank details<textarea id="s-bank" rows="2" placeholder="optional, e.g. Maybank 1234 5678 9012 (Wanisa Renovations)"></textarea></label>
       <label class="span2">Thank-you line<input id="s-thanks"></label>

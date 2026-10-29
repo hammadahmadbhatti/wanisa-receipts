@@ -61,10 +61,6 @@ input.invalid, select.invalid { border-color: var(--error); }
 .item .remove:hover { border-color: var(--error); color: var(--error); }
 #add-item { margin-top: 12px; }
 
-.tax-row { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: end; margin-bottom: 14px; }
-.radio { display: flex; align-items: center; gap: 8px; font-weight: 600; min-height: 44px; }
-.radio input { width: 20px; min-height: 20px; height: 20px; accent-color: var(--charcoal); }
-.rate { width: 120px; }
 .totals {
   display: grid; grid-template-columns: 1fr auto; gap: 6px 16px;
   margin: 0 0 16px auto; max-width: 340px; font-variant-numeric: tabular-nums;

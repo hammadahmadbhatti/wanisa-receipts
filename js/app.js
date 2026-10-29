@@ -17,9 +17,6 @@
     email: 'wanisarenovations@gmail.com',
     web: 'www.wanisarenovations.com',
     prefix: 'WR',
-    taxLabel: 'SST',
-    taxRate: 18,
-    taxReg: '',
     next: 1,
     bank: '',
     thanks: 'Thank you for choosing Wanisa Renovations!',
@@ -34,6 +31,7 @@
     del: function (k) { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } },
   };
   var settings = Object.assign({}, DEFAULTS, store.get(KEY_SETTINGS) || {});
+  ['taxLabel', 'taxRate', 'taxReg'].forEach(function (k) { delete settings[k]; }); // tax option removed
 
   // ---------- money (whole sen, no floating point drift) ----------
   function toSen(v) { var n = parseFloat(String(v).replace(/,/g, '')); return isFinite(n) ? Math.round(n * 100) : 0; }
@@ -130,25 +128,18 @@
 
   function state() {
     var items = readItems();
-    var withTax = $('tax-with').checked;
-    var rate = withTax ? num($('tax-rate').value) : 0;
-    var sub = items.reduce(function (s, i) { return s + i.total; }, 0);
-    var tax = Math.round(sub * rate / 100);
+    var total = items.reduce(function (s, i) { return s + i.total; }, 0);
     return {
       number: $('r-number').value.trim(), date: $('r-date').value, method: $('r-method').value,
       client: { name: $('c-name').value.trim(), phone: $('c-phone').value.trim(), email: $('c-email').value.trim(), address: $('c-address').value.trim() },
-      items: items, withTax: withTax, rate: rate, sub: sub, tax: tax, total: sub + tax, notes: $('r-notes').value.trim(),
+      items: items, total: total, notes: $('r-notes').value.trim(),
     };
   }
 
   function update() {
     var s = state();
     s.items.forEach(function (i) { i.row.refs.amount.textContent = rm(i.total); });
-    $('t-sub').textContent = rm(s.sub);
-    $('t-tax-label').textContent = s.withTax ? settings.taxLabel + ' (' + s.rate + '%)' : 'Tax (not charged)';
-    $('t-tax').textContent = rm(s.tax);
     $('t-total').textContent = rm(s.total);
-    $('tax-rate').disabled = !s.withTax;
   }
 
   // Nothing is saved, so warn before closing or reloading a filled-in form.
@@ -270,26 +261,15 @@
     });
     y = doc.lastAutoTable.finalY + 6;
 
-    // totals
-    var rows = [['Subtotal', rm(s.sub)]];
-    rows.push(s.withTax ? [cfg.taxLabel + ' (' + s.rate + '%)', rm(s.tax)] : ['Tax', 'Not charged']);
+    // total
     if (y + 40 > 270) { doc.addPage(); footer(); y = 24; }
     var tx = R - 80;
-    doc.setFontSize(9.5);
-    rows.forEach(function (r) {
-      doc.setFont('helvetica', 'normal'); doc.setTextColor.apply(doc, MUTED); doc.text(r[0], tx, y);
-      doc.setFont('helvetica', 'bold'); doc.setTextColor.apply(doc, INK); doc.text(r[1], R, y, { align: 'right' });
-      y += 6;
-    });
+    y += 2;
     doc.setFillColor.apply(doc, CHAR);
     doc.roundedRect(tx - 4, y - 3, R - tx + 4, 11, 2, 2, 'F');
-    doc.setTextColor.apply(doc, PEARL); doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold'); doc.setTextColor.apply(doc, PEARL); doc.setFontSize(11);
     doc.text('TOTAL PAID', tx, y + 4);
     doc.setFontSize(12.5); doc.text(rm(s.total), R - 3, y + 4.2, { align: 'right' });
-    if (s.withTax && cfg.taxReg) {
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor.apply(doc, MUTED);
-      doc.text(cfg.taxLabel + ' reg. no.: ' + cfg.taxReg, R, y + 13, { align: 'right' });
-    }
 
     // left column next to the totals: payment status + bank details + notes
     var ly = doc.lastAutoTable.finalY + 6;
@@ -353,8 +333,6 @@
     var c = (draft && draft.client) || {};
     $('c-name').value = c.name || ''; $('c-phone').value = c.phone || '';
     $('c-email').value = c.email || ''; $('c-address').value = c.address || '';
-    $(draft && draft.withTax ? 'tax-with' : 'tax-without').checked = true;
-    $('tax-rate').value = draft && draft.rate !== undefined && draft.rate !== '' ? draft.rate : settings.taxRate;
     $('r-notes').value = (draft && draft.notes) || '';
     var items = (draft && draft.items && draft.items.length) ? draft.items : [{}];
     items.forEach(addItem);
@@ -390,7 +368,7 @@
   });
 
   // ---------- settings dialog ----------
-  var SFIELDS = { name: 's-name', reg: 's-reg', address: 's-address', phone: 's-phone', email: 's-email', web: 's-web', prefix: 's-prefix', taxLabel: 's-tax-label', taxRate: 's-tax-rate', taxReg: 's-tax-reg', next: 's-next', bank: 's-bank', thanks: 's-thanks' };
+  var SFIELDS = { name: 's-name', reg: 's-reg', address: 's-address', phone: 's-phone', email: 's-email', web: 's-web', prefix: 's-prefix', next: 's-next', bank: 's-bank', thanks: 's-thanks' };
   $('open-settings').addEventListener('click', function () {
     Object.keys(SFIELDS).forEach(function (k) { $(SFIELDS[k]).value = settings[k]; });
     $('settings').showModal();
@@ -398,10 +376,8 @@
   $('settings').addEventListener('close', function () {
     if ($('settings').returnValue !== 'save') return;
     Object.keys(SFIELDS).forEach(function (k) { settings[k] = $(SFIELDS[k]).value.trim(); });
-    settings.taxRate = num(settings.taxRate);
     settings.next = Math.max(1, Math.floor(num(settings.next)) || 1);
     settings.prefix = settings.prefix || 'WR';
-    settings.taxLabel = settings.taxLabel || 'Tax';
     settings.name = settings.name || DEFAULTS.name;
     store.set(KEY_SETTINGS, settings);
     update();

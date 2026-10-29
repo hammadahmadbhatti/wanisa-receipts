@@ -10,7 +10,6 @@ browser: no server, no account, no cost. Client details never leave the device.
 - Client: full name, phone, email, address.
 - Services: the 7 Wanisa services, plus **Other** to type any custom service.
   Each line has details (optional), quantity and price in RM.
-- Tax: **with or without**, rate editable (default 18%).
 - **Download PDF** creates an A4 receipt, for example
   `Receipt-WR-2026-0001-Nur-Aisyah-binti-Ahmad.pdf`. **Preview** opens it first.
 - Receipt numbers count up automatically (`WR-2026-0001`, `WR-2026-0002`, …).
@@ -22,9 +21,9 @@ browser: no server, no account, no cost. Client details never leave the device.
 
 1. Open `index.html` (double-click on a laptop, or the hosted link on a phone).
 2. The first time, click **Company details** and fill in the full address,
-   SSM number, tax details and (optional) bank details. They are saved on that
+   SSM number and (optional) bank details. They are saved on that
    device and printed on every receipt.
-3. Fill in the client and services, choose **With tax** or **Without tax**.
+3. Fill in the client and services; the total is calculated as you type.
 4. Click **Download PDF**, then send the PDF to the client on WhatsApp or email.
 5. **New receipt** clears the form and moves to the next number.
 
