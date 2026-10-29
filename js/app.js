@@ -1,5 +1,6 @@
 // Wanisa Renovations receipt generator: runs fully in the browser, nothing is uploaded.
-// Company details and the current draft are kept in this device's localStorage.
+// Only the company details and the receipt counter are kept (localStorage). Client
+// details are never stored: they exist in the open form and the PDF you download.
 (function () {
   'use strict';
 
@@ -24,7 +25,7 @@
     thanks: 'Thank you for choosing Wanisa Renovations!',
   };
   var KEY_SETTINGS = 'wanisa-receipt-settings';
-  var KEY_DRAFT = 'wanisa-receipt-draft';
+  var KEY_OLD_DRAFT = 'wanisa-receipt-draft'; // older versions saved the form here; removed on load
 
   var $ = function (id) { return document.getElementById(id); };
   var store = {
@@ -148,11 +149,18 @@
     $('t-tax').textContent = rm(s.tax);
     $('t-total').textContent = rm(s.total);
     $('tax-rate').disabled = !s.withTax;
-    store.set(KEY_DRAFT, {
-      number: s.number, date: s.date, method: s.method, client: s.client, withTax: s.withTax,
-      rate: $('tax-rate').value, notes: s.notes, items: s.items.map(function (i) { return i.raw; }),
-    });
   }
+
+  // Nothing is saved, so warn before closing or reloading a filled-in form.
+  function hasContent() {
+    var s = state();
+    return Boolean(s.client.name || s.client.phone || s.notes || s.items.some(function (i) { return i.name || i.unit; }));
+  }
+  window.addEventListener('beforeunload', function (e) {
+    if (!hasContent()) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
 
   // ---------- validation ----------
   // The PDF fonts cover Latin letters (incl. accents); other scripts would print as garbage.
@@ -377,7 +385,6 @@
     var started = s.client.name || s.items.some(function (i) { return i.name || i.unit; });
     if (started && !window.confirm('Start a new receipt? The current form will be cleared.')) return;
     if (numberOf(s.number) >= settings.next) markUsed(s);
-    store.del(KEY_DRAFT);
     fill(null);
     $('c-name').focus();
   });
@@ -400,5 +407,6 @@
     update();
   });
 
-  fill(store.get(KEY_DRAFT));
+  store.del(KEY_OLD_DRAFT);
+  fill(null);
 })();

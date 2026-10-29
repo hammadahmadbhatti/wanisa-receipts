@@ -14,7 +14,9 @@ browser: no server, no account, no cost. Client details never leave the device.
 - **Download PDF** creates an A4 receipt, for example
   `Receipt-WR-2026-0001-Nur-Aisyah-binti-Ahmad.pdf`. **Preview** opens it first.
 - Receipt numbers count up automatically (`WR-2026-0001`, `WR-2026-0002`, …).
-- The form is saved as you type, so a refresh or closed tab loses nothing.
+- **No records:** client details are never saved, on the device or online. They exist
+  only in the open form and in the PDF you download. Closing or reloading a filled-in
+  form asks for confirmation first.
 
 ## How to use it
 
@@ -25,6 +27,10 @@ browser: no server, no account, no cost. Client details never leave the device.
 3. Fill in the client and services, choose **With tax** or **Without tax**.
 4. Click **Download PDF**, then send the PDF to the client on WhatsApp or email.
 5. **New receipt** clears the form and moves to the next number.
+
+The only things the browser remembers are the company details and the receipt
+counter (localStorage). Old versions also kept the last form as a draft; that is
+deleted automatically when the page opens.
 
 Company details and the receipt counter are stored per device and browser. If
 you use it on two devices, set the details on both and check the receipt number.
