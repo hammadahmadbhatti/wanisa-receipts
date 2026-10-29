@@ -1,6 +1,6 @@
-# Wanisa Invoices
+# Wanisa Invoices & Receipts
 
-A small invoice generator for **Wanisa Renovations**. It runs completely in the
+A small invoice and receipt generator for **Wanisa Renovations**. It runs completely in the
 browser: no server, no account, no cost. Client details never leave the device.
 
 ## What it does
@@ -11,8 +11,18 @@ browser: no server, no account, no cost. Client details never leave the device.
 - Services: the 7 Wanisa services, plus **Other** to type any custom service.
   Each line has details (optional), quantity and price in RM.
 - **Download PDF** creates an A4 invoice, for example
-  `Invoice-WR-2026-0001-Nur-Aisyah-binti-Ahmad.pdf`. **Preview** opens it first.
-- Invoice numbers count up automatically (`WR-2026-0001`, `WR-2026-0002`, …).
+  `Invoice-WR-INV-2026-0001-Nur-Aisyah-binti-Ahmad.pdf`. **Preview** opens it first.
+- **Invoice or receipt:** a switch at the top. Each has its own wording and its own
+  number series, counting up automatically:
+
+  | | Invoice | Receipt |
+  |---|---|---|
+  | Number | `WR-INV-2026-0001` | `WR-RCP-2026-0001` |
+  | Customer box | CUSTOMER DETAILS | RECEIVED FROM |
+  | Total | TOTAL | TOTAL PAID |
+  | Payment line | Payment method: Cash | Payment received in full by cash. |
+
+  The last choice is remembered. Both next numbers can be changed in Company details.
 - **No records:** client details are never saved, on the device or online. They exist
   only in the open form and in the PDF you download. Closing or reloading a filled-in
   form asks for confirmation first.

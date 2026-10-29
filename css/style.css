@@ -101,3 +101,12 @@ dialog .actions { margin-top: 18px; }
 
 /* author display rules must not un-hide [hidden] elements (e.g. the custom service field) */
 [hidden] { display: none !important; }
+
+/* Invoice / Receipt switch */
+.doc-type { display: inline-grid; grid-template-columns: 1fr 1fr; padding: 4px; gap: 4px; border-radius: 999px; background: var(--pearl); margin-bottom: 8px; }
+.seg { cursor: pointer; }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; }
+.seg span { display: block; min-width: 120px; padding: 10px 22px; border-radius: 999px; text-align: center; font-weight: 700; color: var(--muted); }
+.seg input:checked + span { background: var(--charcoal); color: var(--pearl); }
+.seg input:focus-visible + span { outline: 3px solid var(--mocha); outline-offset: 2px; }
+#type-hint { margin: 0 0 12px; }

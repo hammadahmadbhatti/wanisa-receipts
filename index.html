@@ -7,7 +7,7 @@
 <!-- Only this site's own files may run; no outside scripts, connections, plugins or form posts -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
-<title>Wanisa Invoices</title>
+<title>Wanisa Invoices &amp; Receipts</title>
 <link rel="icon" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/icon-180.png">
 <link rel="stylesheet" href="css/style.css">
@@ -15,16 +15,20 @@
 <body>
 <header class="topbar">
   <img src="assets/logo.png" alt="Wanisa Renovations" class="logo" width="180" height="48">
-  <span class="app-name">Invoice generator</span>
+  <span class="app-name">Invoice &amp; receipt generator</span>
   <button type="button" class="btn btn--ghost" id="open-settings">Company details</button>
 </header>
 
 <main class="wrap">
   <form id="receipt-form" novalidate>
     <section class="card">
-      <h2>Invoice</h2>
+      <div class="doc-type" role="radiogroup" aria-label="Document type">
+        <label class="seg"><input type="radio" name="doc-type" value="invoice" id="type-invoice" checked><span>Invoice</span></label>
+        <label class="seg"><input type="radio" name="doc-type" value="receipt" id="type-receipt"><span>Receipt</span></label>
+      </div>
+      <p class="hint" id="type-hint"></p>
       <div class="grid3">
-        <label>Invoice no.<input id="r-number" required></label>
+        <label><span id="no-label">Invoice no.</span><input id="r-number" required></label>
         <label>Date<input id="r-date" type="date" required></label>
         <label>Payment method
           <select id="r-method">
@@ -59,7 +63,7 @@
       <dl class="totals">
         <dt class="grand">Total</dt><dd class="grand" id="t-total">RM 0.00</dd>
       </dl>
-      <label>Notes (optional, printed on the invoice)<textarea id="r-notes" rows="2" placeholder="e.g. 3-month workmanship warranty on the waterproofing"></textarea></label>
+      <label>Notes (optional, printed on the document)<textarea id="r-notes" rows="2" placeholder="e.g. 3-month workmanship warranty on the waterproofing"></textarea></label>
     </section>
 
     <p class="error" id="form-error" role="alert" hidden></p>
@@ -67,7 +71,7 @@
     <div class="actions">
       <button type="button" class="btn btn--outline" id="preview">Preview</button>
       <button type="submit" class="btn btn--primary" id="download">Download PDF</button>
-      <button type="button" class="btn btn--ghost" id="new-receipt">New invoice</button>
+      <button type="button" class="btn btn--ghost" id="new-receipt">New document</button>
     </div>
   </form>
 </main>
@@ -75,7 +79,7 @@
 <dialog id="settings">
   <form method="dialog" id="settings-form">
     <h2>Company details (letterhead)</h2>
-    <p class="hint">Printed at the top of every invoice. Saved on this device only.</p>
+    <p class="hint">Printed at the top of every invoice and receipt. Saved on this device only.</p>
     <div class="grid2">
       <label>Company name<input id="s-name" required></label>
       <label>SSM registration no.<input id="s-reg" placeholder="optional"></label>
@@ -83,8 +87,9 @@
       <label>Phone / WhatsApp<input id="s-phone"></label>
       <label>Email<input id="s-email" type="email"></label>
       <label>Website<input id="s-web"></label>
-      <label>Invoice prefix<input id="s-prefix" maxlength="8"></label>
-      <label>Next invoice number<input id="s-next" type="number" min="1" step="1"></label>
+      <label>Number prefix<input id="s-prefix" maxlength="8"></label>
+      <label>Next invoice number<input id="s-next-inv" type="number" min="1" step="1"></label>
+      <label>Next receipt number<input id="s-next-rcp" type="number" min="1" step="1"></label>
       <label class="span2">Payment / bank details<textarea id="s-bank" rows="2" placeholder="optional, e.g. Maybank 1234 5678 9012 (Wanisa Renovations)"></textarea></label>
       <label class="span2">Thank-you line<input id="s-thanks"></label>
     </div>

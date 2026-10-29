@@ -1,4 +1,4 @@
-// Wanisa Renovations invoice generator: runs fully in the browser, nothing is uploaded.
+// Wanisa Renovations invoice and receipt generator: runs fully in the browser, nothing is uploaded.
 // Only the company details and the receipt counter are kept (localStorage). Client
 // details are never stored: they exist in the open form and the PDF you download.
 (function () {
@@ -17,7 +17,9 @@
     email: 'wanisarenovations@gmail.com',
     web: 'www.wanisarenovations.com',
     prefix: 'WR',
-    next: 1,
+    nextInvoice: 1,
+    nextReceipt: 1,
+    docType: 'invoice',
     bank: '',
     thanks: 'Thank you for choosing Wanisa Renovations!',
   };
@@ -32,6 +34,23 @@
   };
   var settings = Object.assign({}, DEFAULTS, store.get(KEY_SETTINGS) || {});
   ['taxLabel', 'taxRate', 'taxReg'].forEach(function (k) { delete settings[k]; }); // tax option removed
+  if (settings.next) { settings.nextInvoice = Math.max(settings.nextInvoice, settings.next); delete settings.next; } // one counter before
+
+  // Wording and number series per document type
+  var TYPES = {
+    invoice: {
+      title: 'INVOICE', noLabel: 'Invoice no.', code: 'INV', counter: 'nextInvoice', word: 'invoice', file: 'Invoice',
+      party: 'CUSTOMER DETAILS', total: 'TOTAL',
+      payLine: function (m) { return 'Payment method: ' + m; },
+      hint: 'A bill for the work: shows the payment method, not marked as paid.',
+    },
+    receipt: {
+      title: 'RECEIPT', noLabel: 'Receipt no.', code: 'RCP', counter: 'nextReceipt', word: 'receipt', file: 'Receipt',
+      party: 'RECEIVED FROM', total: 'TOTAL PAID',
+      payLine: function (m) { return 'Payment received in full by ' + m.toLowerCase() + '.'; },
+      hint: 'Proof of payment: confirms the amount was paid in full.',
+    },
+  };
 
   // ---------- money (whole sen, no floating point drift) ----------
   function toSen(v) { var n = parseFloat(String(v).replace(/,/g, '')); return isFinite(n) ? Math.round(n * 100) : 0; }
@@ -46,7 +65,8 @@
     var d = new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
-  function receiptNo(n) { return settings.prefix + '-' + new Date().getFullYear() + '-' + String(n).padStart(4, '0'); }
+  function docNo(type) { return settings.prefix + '-' + TYPES[type].code + '-' + new Date().getFullYear() + '-' + String(settings[TYPES[type].counter]).padStart(4, '0'); }
+  function docType() { return $('type-receipt').checked ? 'receipt' : 'invoice'; }
   function niceDate(iso) {
     var p = String(iso).split('-');
     if (p.length !== 3) return iso;
@@ -130,7 +150,7 @@
     var items = readItems();
     var total = items.reduce(function (s, i) { return s + i.total; }, 0);
     return {
-      number: $('r-number').value.trim(), date: $('r-date').value, method: $('r-method').value,
+      type: docType(), number: $('r-number').value.trim(), date: $('r-date').value, method: $('r-method').value,
       client: { name: $('c-name').value.trim(), phone: $('c-phone').value.trim(), email: $('c-email').value.trim(), address: $('c-address').value.trim() },
       items: items, total: total, notes: $('r-notes').value.trim(),
     };
@@ -160,7 +180,7 @@
     document.querySelectorAll('.invalid').forEach(function (e) { e.classList.remove('invalid'); });
     var bad = [];
     function flag(input, msg) { input.classList.add('invalid'); bad.push(msg); }
-    if (!s.number) flag($('r-number'), 'invoice number');
+    if (!s.number) flag($('r-number'), 'number');
     if (!s.date) flag($('r-date'), 'date');
     if (!s.client.name) flag($('c-name'), 'client name');
     if (!s.client.phone) flag($('c-phone'), 'client phone');
@@ -187,6 +207,7 @@
     var doc = new JsPDF({ unit: 'mm', format: 'a4' });
     var W = 210, M = 16, R = W - M;
     var cfg = settings;
+    var T = TYPES[s.type];
 
     // letterhead: logo left, company details right
     var logoW = 64, logoH = logoW * window.WANISA_LOGO.h / window.WANISA_LOGO.w;
@@ -209,8 +230,8 @@
 
     // title + receipt facts
     doc.setFont('helvetica', 'bold'); doc.setFontSize(22); doc.setTextColor.apply(doc, CHAR);
-    doc.text('INVOICE', M, y);
-    var facts = [['Invoice no.', s.number], ['Date', niceDate(s.date)], ['Payment method', s.method]];
+    doc.text(T.title, M, y);
+    var facts = [[T.noLabel, s.number], ['Date', niceDate(s.date)], ['Payment method', s.method]];
     var fy = y - 7;
     facts.forEach(function (f) {
       doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor.apply(doc, MUTED);
@@ -228,7 +249,7 @@
     var boxH = 13 + clientLines.length * 4.5;
     doc.roundedRect(M, y, R - M, boxH, 2, 2, 'F');
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor.apply(doc, MUTED);
-    doc.text('CUSTOMER DETAILS', M + 5, y + 6);
+    doc.text(T.party, M + 5, y + 6);
     doc.setFontSize(11.5); doc.setTextColor.apply(doc, INK);
     doc.text(c.name, M + 5, y + 11.5);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor.apply(doc, MUTED);
@@ -268,13 +289,13 @@
     doc.setFillColor.apply(doc, CHAR);
     doc.roundedRect(tx - 4, y - 3, R - tx + 4, 11, 2, 2, 'F');
     doc.setFont('helvetica', 'bold'); doc.setTextColor.apply(doc, PEARL); doc.setFontSize(11);
-    doc.text('TOTAL', tx, y + 4);
+    doc.text(T.total, tx, y + 4);
     doc.setFontSize(12.5); doc.text(rm(s.total), R - 3, y + 4.2, { align: 'right' });
 
     // left column next to the totals: payment status + bank details + notes
     var ly = doc.lastAutoTable.finalY + 6;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor.apply(doc, CHAR);
-    doc.text('Payment method: ' + s.method, M, ly);
+    doc.text(T.payLine(s.method), M, ly);
     ly += 6;
     function block(title, text) {
       if (!text) return;
@@ -293,7 +314,7 @@
     doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5); doc.setTextColor.apply(doc, CHAR);
     doc.text(cfg.thanks || '', M, sy);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor.apply(doc, MUTED);
-    doc.text('This is a computer-generated invoice and does not require a signature.', M, sy + 5);
+    doc.text('This is a computer-generated ' + T.word + ' and does not require a signature.', M, sy + 5);
 
     // page numbers once all pages exist
     var n = doc.getNumberOfPages();
@@ -302,32 +323,52 @@
       doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor.apply(doc, MUTED);
       doc.text('Page ' + p + ' of ' + n, R, 290, { align: 'right' });
     }
-    doc.setProperties({ title: 'Invoice ' + s.number, subject: 'Invoice for ' + c.name, author: cfg.name, creator: cfg.name });
+    doc.setProperties({ title: T.file + ' ' + s.number, subject: T.file + ' for ' + c.name, author: cfg.name, creator: cfg.name });
     return doc;
 
     function footer() {
       doc.setDrawColor.apply(doc, DOVE); doc.setLineWidth(0.3); doc.line(M, 284, R, 284);
       doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor.apply(doc, MUTED);
-      doc.text(cfg.name + '  ·  ' + [cfg.phone, cfg.web].filter(Boolean).join('  ·  ') + '  ·  Computer-generated invoice', M, 290);
+      doc.text(cfg.name + '  ·  ' + [cfg.phone, cfg.web].filter(Boolean).join('  ·  ') + '  ·  Computer-generated ' + T.word, M, 290);
     }
   }
 
   function fileName(s) {
     var who = s.client.name.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
-    return 'Invoice-' + s.number.replace(/[^A-Za-z0-9-]+/g, '') + (who ? '-' + who : '') + '.pdf';
+    return TYPES[s.type].file + '-' + s.number.replace(/[^A-Za-z0-9-]+/g, '') + (who ? '-' + who : '') + '.pdf';
   }
 
-  // ---------- receipt numbering ----------
+  // ---------- numbering: one series per document type ----------
   function numberOf(str) { var m = String(str).match(/(\d+)\s*$/); return m ? Number(m[1]) : 0; }
+  // A number belongs to a series when it carries that type's code, e.g. WR-RCP-2026-0007
+  function inSeries(number, type) { return new RegExp('-' + TYPES[type].code + '-\\d{4}-\\d+$').test(number); }
   function markUsed(s) {
+    if (!inSeries(s.number, s.type)) return; // a number from the other series or typed by hand does not move the counter
+    var key = TYPES[s.type].counter;
     var used = numberOf(s.number);
-    if (used >= settings.next) { settings.next = used + 1; store.set(KEY_SETTINGS, settings); }
+    if (used >= settings[key]) { settings[key] = used + 1; store.set(KEY_SETTINGS, settings); }
   }
+
+  // Switching type: labels follow, and an untouched number moves to that type's series
+  function applyType(prev) {
+    var t = docType();
+    var T = TYPES[t];
+    $('no-label').textContent = T.noLabel;
+    $('type-hint').textContent = T.hint;
+    var current = $('r-number').value.trim();
+    if (prev && (!current || inSeries(current, prev))) $('r-number').value = docNo(t);
+    if (settings.docType !== t) { settings.docType = t; store.set(KEY_SETTINGS, settings); }
+  }
+  ['type-invoice', 'type-receipt'].forEach(function (id) {
+    $(id).addEventListener('change', function () { applyType(id === 'type-invoice' ? 'receipt' : 'invoice'); });
+  });
 
   // ---------- form setup ----------
   function fill(draft) {
     $('items').textContent = '';
-    $('r-number').value = (draft && draft.number) || receiptNo(settings.next);
+    $(settings.docType === 'receipt' ? 'type-receipt' : 'type-invoice').checked = true;
+    applyType(null);
+    $('r-number').value = docNo(docType());
     $('r-date').value = (draft && draft.date) || today();
     $('r-method').value = (draft && draft.method) || 'Cash';
     var c = (draft && draft.client) || {};
@@ -361,14 +402,14 @@
   $('new-receipt').addEventListener('click', function () {
     var s = state();
     var started = s.client.name || s.items.some(function (i) { return i.name || i.unit; });
-    if (started && !window.confirm('Start a new invoice? The current form will be cleared.')) return;
-    if (numberOf(s.number) >= settings.next) markUsed(s);
+    if (started && !window.confirm('Start a new ' + TYPES[s.type].word + '? The current form will be cleared.')) return;
+    markUsed(s);
     fill(null);
     $('c-name').focus();
   });
 
   // ---------- settings dialog ----------
-  var SFIELDS = { name: 's-name', reg: 's-reg', address: 's-address', phone: 's-phone', email: 's-email', web: 's-web', prefix: 's-prefix', next: 's-next', bank: 's-bank', thanks: 's-thanks' };
+  var SFIELDS = { name: 's-name', reg: 's-reg', address: 's-address', phone: 's-phone', email: 's-email', web: 's-web', prefix: 's-prefix', nextInvoice: 's-next-inv', nextReceipt: 's-next-rcp', bank: 's-bank', thanks: 's-thanks' };
   $('open-settings').addEventListener('click', function () {
     Object.keys(SFIELDS).forEach(function (k) { $(SFIELDS[k]).value = settings[k]; });
     $('settings').showModal();
@@ -376,10 +417,13 @@
   $('settings').addEventListener('close', function () {
     if ($('settings').returnValue !== 'save') return;
     Object.keys(SFIELDS).forEach(function (k) { settings[k] = $(SFIELDS[k]).value.trim(); });
-    settings.next = Math.max(1, Math.floor(num(settings.next)) || 1);
+    settings.nextInvoice = Math.max(1, Math.floor(num(settings.nextInvoice)) || 1);
+    settings.nextReceipt = Math.max(1, Math.floor(num(settings.nextReceipt)) || 1);
     settings.prefix = settings.prefix || 'WR';
     settings.name = settings.name || DEFAULTS.name;
     store.set(KEY_SETTINGS, settings);
+    var before = $('r-number').value.trim();
+    if (!before || /-(INV|RCP)-\d{4}-\d+$/.test(before)) $('r-number').value = docNo(docType()); // follow a changed prefix/counter
     update();
   });
 
