@@ -11,7 +11,7 @@
   var DEFAULTS = {
     name: 'Wanisa Renovations',
     reg: '',
-    address: 'Kuala Lumpur, Malaysia',
+    address: 'Jalan Aman, Desa Aman Puri\n52100 Kuala Lumpur\nWilayah Persekutuan Kuala Lumpur, Malaysia',
     phone: '+60 14-630 8041',
     email: 'wanisarenovations@gmail.com',
     web: 'www.wanisarenovations.com',
