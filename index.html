@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Wanisa Receipts</title>
+<link rel="icon" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <img src="assets/logo.png" alt="Wanisa Renovations" class="logo" width="180" height="48">
+  <span class="app-name">Receipt generator</span>
+  <button type="button" class="btn btn--ghost" id="open-settings">Company details</button>
+</header>
+
+<main class="wrap">
+  <form id="receipt-form" novalidate>
+    <section class="card">
+      <h2>Receipt</h2>
+      <div class="grid3">
+        <label>Receipt no.<input id="r-number" required></label>
+        <label>Date<input id="r-date" type="date" required></label>
+        <label>Payment method
+          <select id="r-method">
+            <option>Cash</option>
+            <option>Bank transfer</option>
+            <option>DuitNow / QR</option>
+            <option>Debit / credit card</option>
+            <option>Cheque</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Client</h2>
+      <div class="grid2">
+        <label>Full name *<input id="c-name" autocomplete="off" required></label>
+        <label>Phone *<input id="c-phone" type="tel" autocomplete="off" required></label>
+        <label>Email<input id="c-email" type="email" autocomplete="off"></label>
+        <label>Address<input id="c-address" autocomplete="off" placeholder="Unit, street, area"></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Services</h2>
+      <div id="items"></div>
+      <button type="button" class="btn btn--outline" id="add-item">+ Add service</button>
+    </section>
+
+    <section class="card">
+      <h2>Tax and total</h2>
+      <div class="tax-row">
+        <label class="radio"><input type="radio" name="tax" value="with" id="tax-with"> With tax</label>
+        <label class="radio"><input type="radio" name="tax" value="without" id="tax-without" checked> Without tax</label>
+        <label class="rate">Rate (%)<input id="tax-rate" type="number" min="0" max="100" step="0.01" inputmode="decimal"></label>
+      </div>
+      <dl class="totals">
+        <dt>Subtotal</dt><dd id="t-sub">RM 0.00</dd>
+        <dt id="t-tax-label">Tax</dt><dd id="t-tax">RM 0.00</dd>
+        <dt class="grand">Total</dt><dd class="grand" id="t-total">RM 0.00</dd>
+      </dl>
+      <label>Notes (optional, printed on the receipt)<textarea id="r-notes" rows="2" placeholder="e.g. 3-month workmanship warranty on the waterproofing"></textarea></label>
+    </section>
+
+    <p class="error" id="form-error" role="alert" hidden></p>
+
+    <div class="actions">
+      <button type="button" class="btn btn--outline" id="preview">Preview</button>
+      <button type="submit" class="btn btn--primary" id="download">Download PDF</button>
+      <button type="button" class="btn btn--ghost" id="new-receipt">New receipt</button>
+    </div>
+  </form>
+</main>
+
+<dialog id="settings">
+  <form method="dialog" id="settings-form">
+    <h2>Company details (letterhead)</h2>
+    <p class="hint">Printed at the top of every receipt. Saved on this device only.</p>
+    <div class="grid2">
+      <label>Company name<input id="s-name" required></label>
+      <label>SSM registration no.<input id="s-reg" placeholder="optional"></label>
+      <label class="span2">Address<textarea id="s-address" rows="3"></textarea></label>
+      <label>Phone / WhatsApp<input id="s-phone"></label>
+      <label>Email<input id="s-email" type="email"></label>
+      <label>Website<input id="s-web"></label>
+      <label>Receipt prefix<input id="s-prefix" maxlength="8"></label>
+      <label>Tax name<input id="s-tax-label" placeholder="SST"></label>
+      <label>Default tax rate (%)<input id="s-tax-rate" type="number" min="0" max="100" step="0.01"></label>
+      <label>Tax registration no.<input id="s-tax-reg" placeholder="optional, printed when tax is charged"></label>
+      <label>Next receipt number<input id="s-next" type="number" min="1" step="1"></label>
+      <label class="span2">Payment / bank details<textarea id="s-bank" rows="2" placeholder="optional, e.g. Maybank 1234 5678 9012 (Wanisa Renovations)"></textarea></label>
+      <label class="span2">Thank-you line<input id="s-thanks"></label>
+    </div>
+    <div class="actions">
+      <button value="cancel" class="btn btn--ghost" formnovalidate>Cancel</button>
+      <button value="save" class="btn btn--primary" id="save-settings">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/jspdf.plugin.autotable.min.js"></script>
+<script src="js/logo.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
