@@ -299,14 +299,13 @@
     block('NOTES', s.notes);
     block('PAYMENT DETAILS', cfg.bank);
 
-    // thank-you + signature
-    var sy = Math.max(y + 26, ly + 10);
-    if (sy > 262) { doc.addPage(); footer(); sy = 40; }
+    // thank-you line + note instead of a signature
+    var sy = Math.max(y + 24, ly + 10);
+    if (sy > 266) { doc.addPage(); footer(); sy = 40; }
     doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5); doc.setTextColor.apply(doc, CHAR);
     doc.text(cfg.thanks || '', M, sy);
-    doc.setDrawColor.apply(doc, MUTED); doc.setLineWidth(0.3); doc.line(R - 62, sy, R, sy);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor.apply(doc, MUTED);
-    doc.text('Authorised signature', R, sy + 4.5, { align: 'right' });
+    doc.text('This is a computer-generated receipt and does not require a signature.', M, sy + 5);
 
     // page numbers once all pages exist
     var n = doc.getNumberOfPages();
